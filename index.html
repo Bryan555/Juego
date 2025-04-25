@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Adventure - Aprende Matemáticas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Comic Neue', cursive; 
+            background-color: #0f0f2d; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            background-image: radial-gradient(white 1px, transparent 1px), radial-gradient(white 1px, transparent 1px);
+            background-size: 30px 30px; background-position: 0 0, 15px 15px; 
+        }
+        .game-container { 
+            background-color: rgba(0, 0, 50, 0.8); 
+            border-radius: 20px; 
+            padding: 2rem; 
+            width: 90%; 
+            max-width: 600px; 
+            box-shadow: 0 0 30px rgba(65, 105, 225, 0.6); 
+            text-align: center; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        header { margin-bottom: 2rem; }
+        h1, h2 { 
+            font-family: 'Fredoka One', cursive; 
+            color: #ffcc00; 
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
+            margin-bottom: 1rem; 
+        }
+        .game-info { 
+            display: flex; 
+            justify-content: space-around; 
+            background-color: rgba(0, 0, 100, 0.5); 
+            padding: 0.8rem; 
+            border-radius: 10px; 
+            margin-bottom: 1rem; 
+        }
+        .game-screen { transition: all 0.5s ease; padding: 1rem; }
+        .hidden { display: none; }
+        .problem-container { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 2rem; 
+        }
+        .problem { 
+            font-size: 2.5rem; 
+            background-color: rgba(255, 255, 255, 0.1); 
+            padding: 1rem 2rem; 
+            border-radius: 10px; 
+            border: 2px solid #ffcc00; 
+            flex-grow: 1; 
+            margin-right: 1rem; 
+        }
+        .stars { 
+            font-size: 1.5rem; 
+            background-color: rgba(255, 204, 0, 0.2); 
+            padding: 0.5rem 1rem; 
+            border-radius: 50%; 
+            border: 2px solid #ffcc00; 
+        }
+        .options { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 1rem; 
+            margin-bottom: 1rem; 
+        }
+        .option { 
+            background-color: #4169e1; 
+            color: white; 
+            border: none; 
+            padding: 1rem; 
+            font-size: 1.5rem; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            font-family: 'Comic Neue', cursive; 
+        }
+        .option:hover { background-color: #5a7eff; transform: scale(1.05); }
+        .feedback { 
+            font-size: 1.8rem; 
+            padding: 1rem; 
+            border-radius: 10px; 
+            margin-top: 1rem; 
+            animation: fadeIn 0.5s; 
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .correct { background-color: rgba(0, 255, 0, 0.2); color: #00ff00; }
+        .incorrect { background-color: rgba(255, 0, 0, 0.2); color: #ff0000; }
+        button { 
+            background-color: #ffcc00; 
+            color: #0f0f2d; 
+            border: none; 
+            padding: 0.8rem 1.5rem; 
+            font-size: 1.2rem; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            font-family: 'Fredoka One', cursive; 
+            margin-top: 1rem; 
+        }
+        button:hover { background-color: #ffdd33; transform: scale(1.1); }
+        .character, .character-sad { 
+            font-size: 4rem; 
+            margin-top: 1rem; 
+            animation: float 3s ease-in-out infinite; 
+        }
+        .character-sad { animation: shake 0.5s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @media (max-width: 500px) { 
+            .options { grid-template-columns: 1fr; } 
+            .problem-container { flex-direction: column; } 
+            .stars { margin-top: 1rem; } 
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Comic+Neue&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>🌌 Math Adventure 🚀</h1>
+            <div class="game-info">
+                <div class="score">Puntos: <span id="score">0</span></div>
+                <div class="lives">Vidas: <span id="lives">❤️❤️❤️</span></div>
+                <div class="level">Nivel: <span id="level">1</span></div>
+            </div>
+        </header>
+
+        <main>
+            <div class="game-screen" id="start-screen">
+                <h2>¡Bienvenido a Math Adventure!</h2>
+                <p>Ayuda al astronauta a resolver problemas matemáticos para recolectar estrellas.</p>
+                <button id="start-btn">Comenzar Aventura</button>
+                <div class="character">👨‍🚀</div>
+            </div>
+
+            <div class="game-screen hidden" id="game-screen">
+                <div class="problem-container">
+                    <div class="problem" id="problem">3 + 5 = ?</div>
+                    <div class="stars">⭐<span id="stars">0</span></div>
+                </div>
+                <div class="options" id="options"></div>
+                <div class="feedback hidden" id="feedback"></div>
+            </div>
+
+            <div class="game-screen hidden" id="game-over-screen">
+                <h2>¡Fin del viaje!</h2>
+                <p>Tu puntuación final: <span id="final-score">0</span></p>
+                <p>Estrellas recolectadas: <span id="final-stars">0</span></p>
+                <button id="restart-btn">¡Viajar de nuevo!</button>
+                <div class="character-sad">👨‍🚀💫</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del DOM
+            const startScreen = document.getElementById('start-screen');
+            const gameScreen = document.getElementById('game-screen');
+            const gameOverScreen = document.getElementById('game-over-screen');
+            const startBtn = document.getElementById('start-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const problemElement = document.getElementById('problem');
+            const optionsElement = document.getElementById('options');
+            const feedbackElement = document.getElementById('feedback');
+            const scoreElement = document.getElementById('score');
+            const livesElement = document.getElementById('lives');
+            const levelElement = document.getElementById('level');
+            const starsElement = document.getElementById('stars');
+            const finalScoreElement = document.getElementById('final-score');
+            const finalStarsElement = document.getElementById('final-stars');
+
+            // Variables del juego
+            let score = 0, lives = 3, level = 1, stars = 0, currentProblem = {}, correctAnswer;
+            const operatorsByLevel = { 1: ['+', '-'], 2: ['+', '-', '*'], 3: ['+', '-', '*', '/'] };
+
+            // Iniciar juego
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', startGame);
+
+            function startGame() {
+                score = lives = stars = 0; level = 1;
+                scoreElement.textContent = score;
+                livesElement.textContent = '❤️'.repeat(lives);
+                levelElement.textContent = level;
+                starsElement.textContent = stars;
+                startScreen.classList.add('hidden');
+                gameOverScreen.classList.add('hidden');
+                gameScreen.classList.remove('hidden');
+                generateProblem();
+            }
+
+            function generateProblem() {
+                const operators = operatorsByLevel[Math.min(level, 3)];
+                const operator = operators[Math.floor(Math.random() * operators.length)];
+                let num1, num2;
+                
+                switch(operator) {
+                    case '+': num1 = Math.floor(Math.random() * (5 + level * 3)) + 1;
+                             num2 = Math.floor(Math.random() * (5 + level * 3)) + 1; break;
+                    case '-': num1 = Math.floor(Math.random() * (5 + level * 3)) + 5;
+                             num2 = Math.floor(Math.random() * num1) + 1; break;
+                    case '*': num1 = Math.floor(Math.random() * (3 + level)) + 1;
+                             num2 = Math.floor(Math.random() * (3 + level)) + 1; break;
+                    case '/': num2 = Math.floor(Math.random() * (2 + level)) + 1;
+                              num1 = num2 * (Math.floor(Math.random() * (3 + level)) + 1); break;
+                }
+                
+                switch(operator) {
+                    case '+': correctAnswer = num1 + num2; break;
+                    case '-': correctAnswer = num1 - num2; break;
+                    case '*': correctAnswer = num1 * num2; break;
+                    case '/': correctAnswer = num1 / num2; break;
+                }
+                
+                currentProblem = { num1, num2, operator };
+                problemElement.textContent = `${num1} ${operator} ${num2} = ?`;
+                generateOptions(correctAnswer);
+            }
+
+            function generateOptions(correct) {
+                optionsElement.innerHTML = '';
+                let options = [correct];
+                while (options.length < 4) {
+                    let wrongAnswer;
+                    const variation = Math.floor(Math.random() * 5) + 1;
+                    if (Math.random() > 0.5) wrongAnswer = correct + variation;
+                    else wrongAnswer = correct - variation;
+                    if (currentProblem.operator === '/' && wrongAnswer <= 0) wrongAnswer = correct + variation;
+                    if (!options.includes(wrongAnswer)) options.push(wrongAnswer);
+                }
+                
+                options = shuffleArray(options);
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'option';
+                    button.textContent = option;
+                    button.addEventListener('click', () => checkAnswer(option, correct));
+                    optionsElement.appendChild(button);
+                });
+            }
+
+            function checkAnswer(selected, correct) {
+                if (selected === correct) {
+                    feedbackElement.textContent = '¡Correcto! 🎉';
+                    feedbackElement.className = 'feedback correct';
+                    score += 10 * level;
+                    stars += 1;
+                    if (stars % 3 === 0) {
+                        level += 1;
+                        levelElement.textContent = level;
+                        feedbackElement.textContent += ` ¡Nivel ${level}! 🚀`;
+                    }
+                } else {
+                    feedbackElement.textContent = `Incorrecto 😢 La respuesta era ${correct}`;
+                    feedbackElement.className = 'feedback incorrect';
+                    lives -= 1;
+                    livesElement.textContent = '❤️'.repeat(lives);
+                    if (lives <= 0) { endGame(); return; }
+                }
+                
+                scoreElement.textContent = score;
+                starsElement.textContent = stars;
+                feedbackElement.classList.remove('hidden');
+                setTimeout(() => {
+                    feedbackElement.classList.add('hidden');
+                    generateProblem();
+                }, 1500);
+            }
+
+            function endGame() {
+                gameScreen.classList.add('hidden');
+                gameOverScreen.classList.remove('hidden');
+                finalScoreElement.textContent = score;
+                finalStarsElement.textContent = stars;
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+        });
+    </script>
+</body>
+</html>
